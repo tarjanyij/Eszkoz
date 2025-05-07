@@ -1,0 +1,13 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+  <h2>Beszállítók</h2>
+  <a href="{% url 'beszallito_create' %}">Új beszállító</a>
+  <ul>
+    {% for b in beszallitok %}
+      <li>{{ b.beszallitoNev }} - {{ b.beszallitoTel }}
+        | <a href="{% url 'beszallito_edit' b.pk %}">Szerkesztés</a>
+        | <a href="{% url 'beszallito_delete' b.pk %}">Törlés</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

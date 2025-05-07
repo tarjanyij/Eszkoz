@@ -1,0 +1,10 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+  <h2>Személyek</h2>
+  <a href="{% url 'szemely_create' %}">Új személy</a>
+  <ul>
+    {% for b in szemelyek %}
+      <li>{{ b.snev }} - {{ b.email }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

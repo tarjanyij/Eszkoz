@@ -1,0 +1,135 @@
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
+from django.template import loader
+from .models import Eszkoz, Beszallito, Szemely, Tipus
+from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm
+
+
+def eszkozkezelo_app(request):
+    template = loader.get_template('myfirst.html')
+    return HttpResponse(template.render())
+# Create your views here.
+
+# Eszköz
+def eszkoz_list(request):
+    eszkozok = Eszkoz.objects.all()
+    return render(request, 'eszkozkezelo_app/eszkoz_list.html', {'eszkozok': eszkozok})
+
+def eszkoz_create(request):
+    if request.method == 'POST':
+        form = EszkozForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('eszkoz_list')
+    else:
+        form = EszkozForm()
+    return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
+
+# Beszállító
+def beszallito_list(request):
+    beszallitok = Beszallito.objects.all()
+    return render(request, 'eszkozkezelo_app/beszallito_list.html', {'beszallitok': beszallitok})
+
+def beszallito_create(request):
+    if request.method == 'POST':
+        form = BeszallitoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('beszallito_list')
+    else:
+        form = BeszallitoForm()
+    return render(request, 'eszkozkezelo_app/beszallito_form.html', {'form': form})
+
+# Szerkesztés
+def beszallito_edit(request, pk):
+    beszallito = get_object_or_404(Beszallito, pk=pk)
+    if request.method == 'POST':
+        form = BeszallitoForm(request.POST, instance=beszallito)
+        if form.is_valid():
+            form.save()
+            return redirect('beszallito_list')
+    else:
+        form = BeszallitoForm(instance=beszallito)
+    return render(request, 'eszkozkezelo_app/beszallito_form.html', {'form': form})
+
+# Törlés
+def beszallito_delete(request, pk):
+    beszallito = get_object_or_404(Beszallito, pk=pk)
+    if request.method == 'POST':
+        beszallito.delete()
+        return redirect('beszallito_list')
+    return render(request, 'eszkozkezelo_app/beszallito_confirm_delete.html', {'beszallito': beszallito})
+
+
+# Személy
+def szemely_list(request):
+    szemelyek = Szemely.objects.all()
+    return render(request, 'eszkozkezelo_app/szemely_list.html', {'szemelyek': szemelyek})
+
+def szemely_create(request):
+    if request.method == 'POST':
+        form = SzemelyForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('szemely_list')
+    else:
+        form = SzemelyForm()
+    return render(request, 'eszkozkezelo_app/szemely_form.html', {'form': form})
+
+# Szerkesztés
+def szemely_edit(request, pk):
+    szemely = get_object_or_404(Szemely, pk=pk)
+    if request.method == 'POST':
+        form = SzemelyForm(request.POST, instance=szemely)
+        if form.is_valid():
+            form.save()
+            return redirect('szemely_list')
+    else:
+        form = SzemelyForm(instance=szemely)
+    return render(request, 'eszkozkezelo_app/szemely_form.html', {'form': form})
+
+# Törlés
+def szemely_delete(request, pk):
+    szemely = get_object_or_404(Szemely, pk=pk)
+    if request.method == 'POST':
+        szemely.delete()
+        return redirect('szemely_list')
+    return render(request, 'eszkozkezelo_app/szemely_confirm_delete.html', {'szemely': szemely})
+
+
+
+# Típus
+def tipus_list(request):
+    tipusok = Tipus.objects.all()
+    return render(request, 'eszkozkezelo_app/tipus_list.html', {'tipusok': tipusok})
+
+def tipus_create(request):
+    if request.method == 'POST':
+        form = TipusForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('tipus_list')
+    else:
+        form = TipusForm()
+    return render(request, 'eszkozkezelo_app/tipus_form.html', {'form': form})
+
+ # Szerkesztés
+def tipus_edit(request, pk):
+    tipus = get_object_or_404(Tipus, pk=pk)
+    if request.method == 'POST':
+        form = TipusForm(request.POST, instance=tipus)
+        if form.is_valid():
+            form.save()
+            return redirect('tipus_list')
+    else:
+        form = TipusForm(instance=tipus)
+    return render(request, 'eszkozkezelo_app/tipus_form.html', {'form': form})
+
+# Törlés
+def tipus_delete(request, pk):
+    tipus = get_object_or_404(Tipus, pk=pk)
+    if request.method == 'POST':
+        tipus.delete()
+        return redirect('tipus_list')
+    return render(request, 'eszkozkezelo_app/stipus_confirm_delete.html', {'tipus': tipus})
+   

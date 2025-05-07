@@ -1,0 +1,11 @@
+{% extends "eszkozkezelo_app/base.html" %}
+
+{% block content %}
+    <h2>Eszközök listája</h2>
+    <a href="{% url 'eszkoz_create' %}">Új eszköz</a>
+    <ul>
+    {% for eszkoz in eszkozok %}
+        <li>{{ eszkoz.megnevezes }} ({{ eszkoz.gyariszam }})</li>
+    {% endfor %}
+    </ul>
+{% endblock %}

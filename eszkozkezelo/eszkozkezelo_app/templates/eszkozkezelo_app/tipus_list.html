@@ -1,0 +1,13 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+  <h2>Típusok</h2>
+  <a href="{% url 'tipus_create' %}">Új Típus</a>
+  <ul>
+    {% for b in tipusok %}
+      <li>{{ b.megnevezes }}
+        | <a href="{% url 'tipus_edit' b.pk %}">Szerkesztés</a>
+        | <a href="{% url 'tipus_delete' b.pk %}">Törlés</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
