@@ -1,7 +1,11 @@
 {% extends "eszkozkezelo_app/base.html" %}
 
 {% block content %}
-    <h2>Új eszköz hozzáadása</h2>
+{% if form.instance.pk %}
+Eszköz szerkesztése: {{ form.instance.megnevezes }}
+{% else %}
+Új eszköz hozzáadása
+{% endif %}
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {{ form.as_p }}

@@ -5,6 +5,9 @@ urlpatterns = [
     path('eszkozkezelo_app/', views.eszkozkezelo_app, name='eszkozkezelo_app'),
     path('', views.eszkoz_list, name='eszkoz_list'),
     path('uj/', views.eszkoz_create, name='eszkoz_create'),
+    path('eszkoz/<int:pk>/brief/', views.eszkoz_brief_view, name='eszkoz_brief'),
+    path('eszkoz/<int:pk>/szerkesztes/', views.eszkoz_edit, name='eszkoz_edit'),
+    path('eszkoz/<int:pk>/torles/', views.eszkoz_delete, name='eszkoz_delete'),
 
     path('beszallitok/', views.beszallito_list, name='beszallito_list'),
     path('beszallitok/uj/', views.beszallito_create, name='beszallito_create'),

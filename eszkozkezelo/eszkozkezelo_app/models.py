@@ -103,7 +103,8 @@ class Eszkoz(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Hol van"
     )
-  
+    def __str__(self):
+        return self.megnevezes  
 
 class Mozgastipusok(models.Model):
     megnevezes = models.CharField(

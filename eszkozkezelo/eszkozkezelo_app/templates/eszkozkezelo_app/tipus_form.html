@@ -1,6 +1,10 @@
 {% extends "eszkozkezelo_app/base.html" %}
 {% block content %}
-  <h2>Típus hozzáadása</h2>
+{% if form.instance.pk %}
+Típus szerkesztése: {{ form.instance.megnevezes }}
+{% else %}
+Új típus hozzáadása
+{% endif %}
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

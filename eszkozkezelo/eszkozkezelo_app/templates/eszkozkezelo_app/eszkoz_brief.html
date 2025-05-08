@@ -1,0 +1,21 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+<h1>{{ eszkoz.megnevezes }}</h1>
+    <p><strong>Gyári szám:</strong> {{ eszkoz.gyariszam }}</p>
+    <p><strong>Típus:</strong> {{ eszkoz.tipus.megnevezes }}</p>
+    <p><strong>Beszerzési idő:</strong> {{ eszkoz.beszerzesiIdo }}</p>
+    <p><strong>Selejtezési idő:</strong> {{ eszkoz.selejtezesiIdo }}</p>
+    <p><strong>Felelős személy:</strong> {{ eszkoz.holvanId.nev }}</p>
+    <p><strong>Aktív:</strong> {{ eszkoz.aktiv|yesno:"Igen,Nem" }}</p>
+    <p><strong>Képek száma:</strong> {{ eszkoz.kepek.count }}</p>
+
+    <h3>Képek:</h3>
+    <ul>
+        {% for kep in eszkoz.kepek.all %}
+            <li><img src="{{ kep.kep.url }}" alt="Kép" width="200"></li>
+        {% empty %}
+            <li>Nincs feltöltött kép.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'eszkoz_list' %}">Vissza</a>
+{% endblock %}

@@ -1,6 +1,10 @@
 {% extends "eszkozkezelo_app/base.html" %}
 {% block content %}
-  <h2>Beszállító hozzáadása</h2>
+{% if form.instance.pk %}
+Beszállító szerkesztése: {{ form.instance.beszallitoNev }}
+{% else %}
+Új beszállító hozzáadása
+{% endif %}
   <form method="post">
     {% csrf_token %}
     {{ form.as_p }}

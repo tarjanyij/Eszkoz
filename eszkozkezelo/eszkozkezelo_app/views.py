@@ -10,10 +10,15 @@ def eszkozkezelo_app(request):
     return HttpResponse(template.render())
 # Create your views here.
 
-# Eszköz
+### Eszköz ###
+##############
 def eszkoz_list(request):
     eszkozok = Eszkoz.objects.all()
     return render(request, 'eszkozkezelo_app/eszkoz_list.html', {'eszkozok': eszkozok})
+
+def eszkoz_brief_view(request, pk):
+    eszkoz = get_object_or_404(Eszkoz, pk=pk)
+    return render(request, 'eszkozkezelo_app/eszkoz_brief.html', {'eszkoz': eszkoz})
 
 def eszkoz_create(request):
     if request.method == 'POST':
@@ -24,8 +29,28 @@ def eszkoz_create(request):
     else:
         form = EszkozForm()
     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
+# Szerkesztés
+def eszkoz_edit(request, pk):
+    eszkoz = get_object_or_404(Eszkoz, pk=pk)
+    if request.method == 'POST':
+        form = EszkozForm(request.POST, instance=eszkoz)
+        if form.is_valid():
+            form.save()
+            return redirect('eszkoz_list')
+    else:
+        form = EszkozForm(instance=eszkoz)
+    return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form, 'eszkoz': eszkoz})
 
-# Beszállító
+# Törlés
+def eszkoz_delete(request, pk):
+    eszkoz = get_object_or_404(Eszkoz, pk=pk)
+    if request.method == 'POST':
+        Eszkoz.delete()
+        return redirect('eszkoz_list')
+    return render(request, 'eszkozkezelo_app/eszkoz_confirm_delete.html', {'eszkoz': eszkoz})
+
+### Beszállító ###
+##################
 def beszallito_list(request):
     beszallitok = Beszallito.objects.all()
     return render(request, 'eszkozkezelo_app/beszallito_list.html', {'beszallitok': beszallitok})
@@ -61,7 +86,8 @@ def beszallito_delete(request, pk):
     return render(request, 'eszkozkezelo_app/beszallito_confirm_delete.html', {'beszallito': beszallito})
 
 
-# Személy
+### Személy ###
+###############
 def szemely_list(request):
     szemelyek = Szemely.objects.all()
     return render(request, 'eszkozkezelo_app/szemely_list.html', {'szemelyek': szemelyek})
@@ -97,8 +123,8 @@ def szemely_delete(request, pk):
     return render(request, 'eszkozkezelo_app/szemely_confirm_delete.html', {'szemely': szemely})
 
 
-
-# Típus
+### Típus ###
+#############
 def tipus_list(request):
     tipusok = Tipus.objects.all()
     return render(request, 'eszkozkezelo_app/tipus_list.html', {'tipusok': tipusok})

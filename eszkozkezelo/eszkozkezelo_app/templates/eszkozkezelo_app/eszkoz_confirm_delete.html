@@ -1,0 +1,9 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+  <h2>Biztosan törölni szeretnéd: {{ eszkoz.megnevezes }}?</h2>
+  <form method="post">
+    {% csrf_token %}
+    <button type="submit">Igen, törlöm</button>
+    <a href="{% url 'eszkoz_list' %}">Mégsem</a>
+  </form>
+{% endblock %}

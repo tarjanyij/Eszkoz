@@ -5,7 +5,11 @@
     <a href="{% url 'eszkoz_create' %}">Új eszköz</a>
     <ul>
     {% for eszkoz in eszkozok %}
-        <li>{{ eszkoz.megnevezes }} ({{ eszkoz.gyariszam }})</li>
+        <li><a href="{% url 'eszkoz_brief' eszkoz.pk %}">{{ eszkoz.megnevezes }}</a> &nbsp;({{ eszkoz.gyariszam }}) &nbsp;
+            | <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
+            | <a href="{% url 'eszkoz_delete' eszkoz.pk %}">Törlés</a>
+        </li>
+        
     {% endfor %}
     </ul>
 {% endblock %}
