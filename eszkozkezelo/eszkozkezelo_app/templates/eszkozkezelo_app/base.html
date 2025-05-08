@@ -5,6 +5,13 @@
     <title>Eszközkezelő</title>
 </head>
 <body>
+    {% if user.is_authenticated %}
+  Bejelentkezve: {{ user.username }} |
+  <a href="{% url 'logout' %}">Kijelentkezés</a>
+{% else %}
+  <a href="{% url 'login' %}">Bejelentkezés</a> |
+  <a href="{% url 'register' %}">Regisztráció</a>
+{% endif %}
     <h1>Eszközkezelő rendszer</h1>
     {% block content %}{% endblock %}
 </body>

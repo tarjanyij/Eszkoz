@@ -3,7 +3,19 @@ from django.http import HttpResponse
 from django.template import loader
 from .models import Eszkoz, Beszallito, Szemely, Tipus
 from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib import messages
 
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Sikeres regisztráció. Most már bejelentkezhetsz.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'eszkozkezelo_app/register.html', {'form': form})
 
 def eszkozkezelo_app(request):
     template = loader.get_template('myfirst.html')
