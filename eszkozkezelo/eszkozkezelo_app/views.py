@@ -5,6 +5,7 @@ from .models import Eszkoz, Beszallito, Szemely, Tipus
 from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.db.models import Q
 
 def register(request):
     if request.method == 'POST':
@@ -25,8 +26,36 @@ def eszkozkezelo_app(request):
 ### Eszköz ###
 ##############
 def eszkoz_list(request):
+    query = request.GET.get('q', '')
+    tipus_id = request.GET.get('tipus')
+    beszallito_id = request.GET.get('beszallito')
+    aktiv = request.GET.get('aktiv')
+
     eszkozok = Eszkoz.objects.all()
-    return render(request, 'eszkozkezelo_app/eszkoz_list.html', {'eszkozok': eszkozok})
+
+    if query:
+        eszkozok = eszkozok.filter(
+            Q(megnevezes__icontains=query) | Q(gyariszam__icontains=query)
+        )
+    
+    if tipus_id:
+        eszkozok = eszkozok.filter(tipus_id=tipus_id)
+    
+    if beszallito_id:
+        eszkozok = eszkozok.filter(beszallito_id=beszallito_id)
+    
+    if aktiv in ['true', 'false']:
+        eszkozok = eszkozok.filter(aktiv=(aktiv == 'true'))
+
+    return render(request, 'eszkozkezelo_app/eszkoz_list.html', {
+        'eszkozok': eszkozok,
+        'query': query,
+        'tipusok': Tipus.objects.all(),
+        'beszallitok': Beszallito.objects.all(),
+        'tipus_id': tipus_id,
+        'beszallito_id': beszallito_id,
+        'aktiv': aktiv,
+    })
 
 def eszkoz_brief_view(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)

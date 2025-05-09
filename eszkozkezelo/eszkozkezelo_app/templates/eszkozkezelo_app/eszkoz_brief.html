@@ -1,21 +1,75 @@
 {% extends "eszkozkezelo_app/base.html" %}
 {% block content %}
-<h1>{{ eszkoz.megnevezes }}</h1>
-    <p><strong>Gyári szám:</strong> {{ eszkoz.gyariszam }}</p>
-    <p><strong>Típus:</strong> {{ eszkoz.tipus.megnevezes }}</p>
-    <p><strong>Beszerzési idő:</strong> {{ eszkoz.beszerzesiIdo }}</p>
-    <p><strong>Selejtezési idő:</strong> {{ eszkoz.selejtezesiIdo }}</p>
-    <p><strong>Felelős személy:</strong> {{ eszkoz.holvanId.nev }}</p>
-    <p><strong>Aktív:</strong> {{ eszkoz.aktiv|yesno:"Igen,Nem" }}</p>
-    <p><strong>Képek száma:</strong> {{ eszkoz.kepek.count }}</p>
+<div class="container mt-5">
+    <div class="card shadow rounded-4">
+      <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">{{ eszkoz.megnevezes }}</h3>
+      </div>
+      <div class="card-body">
+        <dl class="row">
+          <dt class="col-sm-4">Gyári szám:</dt>
+          <dd class="col-sm-8">{{ eszkoz.gyariszam }}</dd>
+  
+          <dt class="col-sm-4">Típus:</dt>
+          <dd class="col-sm-8">{{ eszkoz.tipus.megnevezes }}</dd>
+  
+          <dt class="col-sm-4">Beszerzési idő:</dt>
+          <dd class="col-sm-8">{{ eszkoz.beszerzesiIdo }}</dd>
+  
+          <dt class="col-sm-4">Selejtezési idő:</dt>
+          <dd class="col-sm-8">{{ eszkoz.selejtezesiIdo }}</dd>
+  
+          <dt class="col-sm-4">Garancia idő (hónap):</dt>
+          <dd class="col-sm-8">{{ eszkoz.garanciaIdo }}</dd>
+  
+          <dt class="col-sm-4">Aktív:</dt>
+          <dd class="col-sm-8">
+            {% if eszkoz.aktiv %}
+              <span class="badge bg-success">Igen</span>
+            {% else %}
+              <span class="badge bg-danger">Nem</span>
+            {% endif %}
+          </dd>
+  
+          <dt class="col-sm-4">Tartozék?</dt>
+          <dd class="col-sm-8">
+            {% if eszkoz.tartozek %}
+              Igen ({{ eszkoz.tartozek_eszkoz.megnevezes }})
+            {% else %}
+              Nem
+            {% endif %}
+          </dd>
+  
+          <dt class="col-sm-4">Hol van?</dt>
+          <dd class="col-sm-8">{{ eszkoz.holvanId.nev }}</dd>
+  
+          <dt class="col-sm-4">Beszállító:</dt>
+          <dd class="col-sm-8">{{ eszkoz.beszallito.beszallitoNev }}</dd>
+        </dl>
+        <a href="{% url 'eszkoz_edit' eszkoz.id %}" class="btn btn-outline-primary">Szerkesztés</a>
+        <a href="{% url 'eszkoz_list' %}" class="btn btn-secondary">Vissza a listához</a>
+    </div>
+</div>
+</div> 
 
-    <h3>Képek:</h3>
-    <ul>
-        {% for kep in eszkoz.kepek.all %}
-            <li><img src="{{ kep.kep.url }}" alt="Kép" width="200"></li>
-        {% empty %}
-            <li>Nincs feltöltött kép.</li>
-        {% endfor %}
-    </ul>
-    <a href="{% url 'eszkoz_list' %}">Vissza</a>
+<div class="container mt-5">
+    <div class="card shadow rounded-4">
+      <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Képek</h4>
+      </div>
+      <div class="card-body">  
+    
+        <ul>
+            {% for kep in eszkoz.kepek.all %}
+                <li><img src="{{ kep.kep.url }}" alt="Kép" width="200"></li>
+            {% empty %}
+                <li>Nincs feltöltött kép.</li>
+            {% endfor %}
+        </ul>
+        <a href="{% url 'eszkoz_list' %}">Vissza</a>
+
+        </div>
+    </div>
+</div> 
+
 {% endblock %}

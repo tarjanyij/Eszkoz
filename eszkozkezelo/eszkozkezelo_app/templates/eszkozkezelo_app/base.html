@@ -1,18 +1,40 @@
 <!DOCTYPE html>
 <html lang="hu">
-<head>
-    <meta charset="UTF-8">
-    <title>Eszközkezelő</title>
-</head>
-<body>
-    {% if user.is_authenticated %}
-  Bejelentkezve: {{ user.username }} |
-  <a href="{% url 'logout' %}">Kijelentkezés</a>
-{% else %}
-  <a href="{% url 'login' %}">Bejelentkezés</a> |
-  <a href="{% url 'register' %}">Regisztráció</a>
-{% endif %}
-    <h1>Eszközkezelő rendszer</h1>
-    {% block content %}{% endblock %}
-</body>
+    <head>
+        <meta charset="UTF-8">
+        <title>Eszközkezelő</title>
+            {% load bootstrap5 %}
+            {% bootstrap_css %}
+            {% bootstrap_javascript %}
+    </head>
+    <body class="bg-light">
+        <div class="container">
+            <ul class="nav bg-info">
+            <li class="nav-item">
+                <a class="nav-link link-light" href="/">HOME</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link link-light" href="/beszallitok">Beszállítók</a>
+            </li>
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <div class="nav-link link-light">Bejelentkezve: {{ user.username }} | </div>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link link-light" href="{% url 'logout' %}">Kijelentkezés</a>
+                </li>
+            {% else %}
+                <li class="nav-item">
+                    <a class="nav-link link-light" href="{% url 'login' %}">Bejelentkezés</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link link-light" href="{% url 'register' %}">Regisztráció</a>
+                </li>
+            {% endif %}
+            </ul>
+      
+            {% block content %}
+            {% endblock %}
+        </div>    
+    </body>
 </html>

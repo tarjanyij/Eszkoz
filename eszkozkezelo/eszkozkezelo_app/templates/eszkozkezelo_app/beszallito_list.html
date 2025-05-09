@@ -1,13 +1,36 @@
 {% extends "eszkozkezelo_app/base.html" %}
 {% block content %}
+&nbsp;
   <h2>Beszállítók</h2>
-  <a href="{% url 'beszallito_create' %}">Új beszállító</a>
-  <ul>
-    {% for b in beszallitok %}
-      <li>{{ b.beszallitoNev }} - {{ b.beszallitoTel }}
-        | <a href="{% url 'beszallito_edit' b.pk %}">Szerkesztés</a>
-        | <a href="{% url 'beszallito_delete' b.pk %}">Törlés</a>
-      </li>
-    {% endfor %}
-  </ul>
+  <a class="btn btn-primary mb-3" role="button" href="{% url 'beszallito_create' %}">Új beszállító</a>
+  <div class="container mt-5">
+   
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Megnevezes</th>
+            <th scope="col">Kontatkt név</th>
+            <th scope="col">Telefon</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for b in beszallitok %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ b.beszallitoNev }}</td>
+                <td>{{b.beszallitoKontatkt }}</td>
+                <td>{{b.beszallitoTel }}</td>
+                <td>
+                    <a href="{% url 'beszallito_edit' b.pk %}">Szerkesztés</a>
+                    | <a href="{% url 'beszallito_delete' b.pk %}">Törlés</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+</div> 
+
+  
 {% endblock %}

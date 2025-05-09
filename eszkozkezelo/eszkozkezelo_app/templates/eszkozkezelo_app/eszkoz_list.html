@@ -1,15 +1,75 @@
 {% extends "eszkozkezelo_app/base.html" %}
 
 {% block content %}
-    <h2>Eszközök listája</h2>
-    <a href="{% url 'eszkoz_create' %}">Új eszköz</a>
-    <ul>
-    {% for eszkoz in eszkozok %}
-        <li><a href="{% url 'eszkoz_brief' eszkoz.pk %}">{{ eszkoz.megnevezes }}</a> &nbsp;({{ eszkoz.gyariszam }}) &nbsp;
-            | <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
-            | <a href="{% url 'eszkoz_delete' eszkoz.pk %}">Törlés</a>
-        </li>
-        
-    {% endfor %}
-    </ul>
+&nbsp;
+<h2>Eszközök listája</h2>
+
+<a class="btn btn-primary mb-3" role="button" href="{% url 'eszkoz_create' %}">Új eszköz</a>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <input type="text" name="q" class="form-control" placeholder="Keresés..." value="{{ query }}">
+    </div>
+
+    <div class="col-md-2">
+        <select name="tipus" class="form-select">
+            <option value="">Összes típus</option>
+            {% for t in tipusok %}
+                <option value="{{ t.id }}" {% if t.id|stringformat:"s" == tipus_id %}selected{% endif %}>{{ t.megnevezes }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <select name="beszallito" class="form-select">
+            <option value="">Összes beszállító</option>
+            {% for b in beszallitok %}
+                <option value="{{ b.id }}" {% if b.id|stringformat:"s" == beszallito_id %}selected{% endif %}>{{ b.beszallitoNev }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="col-auto">
+        <select name="aktiv" class="form-select">
+            <option value="">Aktív státusz</option>
+            <option value="true" {% if aktiv == 'true' %}selected{% endif %}>Aktív</option>
+            <option value="false" {% if aktiv == 'false' %}selected{% endif %}>Nem aktív</option>
+        </select>
+    </div>
+
+    <div class="col-auto d-grid">
+        <button type="submit" class="btn btn-primary">Szűrés</button>
+    </div>
+    <div class="col-auto d-grid">
+        <a href="{% url 'eszkoz_list' %}" class="btn btn-secondary">Összes mutatása</a>
+    </div>
+</form>
+
+<div class="container mt-5">
+   
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Megnevezes</th>
+            <th scope="col">Gyári szám</th>
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for eszkoz in eszkozok %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td><a href="{% url 'eszkoz_brief' eszkoz.pk %}">{{ eszkoz.megnevezes }}</a></td>
+                <td>{{ eszkoz.gyariszam }}</td>
+                <td>
+                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
+                    | <a href="{% url 'eszkoz_delete' eszkoz.pk %}">Törlés</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+</div> 
+    
 {% endblock %}
