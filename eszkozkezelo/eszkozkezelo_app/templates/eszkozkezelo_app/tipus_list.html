@@ -1,13 +1,38 @@
 {% extends "eszkozkezelo_app/base.html" %}
 {% block content %}
+&nbsp;
   <h2>Típusok</h2>
-  <a href="{% url 'tipus_create' %}">Új Típus</a>
-  <ul>
-    {% for b in tipusok %}
-      <li>{{ b.megnevezes }}
-        | <a href="{% url 'tipus_edit' b.pk %}">Szerkesztés</a>
-        | <a href="{% url 'tipus_delete' b.pk %}">Törlés</a>
-      </li>
-    {% endfor %}
-  </ul>
+  <a class="btn btn-primary mb-3" role="button" href="{% url 'tipus_create' %}">Új Típus</a>
+  <div class="container mt-5">
+   
+    <table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Megnevezes</th>
+            
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+            {% for b in tipusok %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ b.megnevezes }}</td>
+                
+                <td>
+                  {% if is_admin %}
+                    <a href="{% url 'tipus_edit' b.pk %}">Szerkesztés</a>
+                    | <a href="{% url 'tipus_delete' b.pk %}">Törlés</a>
+                  {% elif is_operator %}
+                    <a href="{% url 'tipus_edit' b.pk %}">Szerkesztés</a>
+                  {% else %}
+                    <span class="text-muted">Csak megtekintés</span>
+                  {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+      </table>
+  </div>   
 {% endblock %}

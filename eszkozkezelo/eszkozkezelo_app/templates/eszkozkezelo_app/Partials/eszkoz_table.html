@@ -1,53 +1,33 @@
-{% extends "eszkozkezelo_app/base.html" %}
-{% block content %}
-&nbsp;
-  <h2>Beszállítók</h2>
-  <a class="btn btn-primary mb-3" role="button" href="{% url 'beszallito_create' %}">Új beszállító</a>
-<form method="get" class="row g-3 mb-4">
-    <div class="col-md-4">
-        <input type="text" name="q" class="form-control" placeholder="Keresés..." value="{{ query }}">
-    </div>
-    <div class="col-auto d-grid">
-        <button type="submit" class="btn btn-primary">Szűrés</button>
-    </div>
-    <div class="col-auto d-grid">
-        <a href="{% url 'beszallito_list' %}" class="btn btn-secondary">Összes mutatása</a>
-    </div>
-  </form>
-
-  <div class="container mt-5">
-   
-    <table class="table table-hover">
+<table class="table table-hover">
         <thead>
           <tr>
             <th scope="col">#</th>
             <th scope="col">Megnevezes</th>
-            <th scope="col">Kontatkt név</th>
-            <th scope="col">Telefon</th>
+            <th scope="col">Gyári szám</th>
             <th scope="col"></th>
           </tr>
         </thead>
         <tbody>
-            {% for b in page_obj %}
+            {% for eszkoz in page_obj %}
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
-                <td>{{ b.beszallitoNev }}</td>
-                <td>{{b.beszallitoKontatkt }}</td>
-                <td>{{b.beszallitoTel }}</td>
+                <td><a href="{% url 'eszkoz_brief' eszkoz.pk %}">{{ eszkoz.megnevezes }}</a></td>
+                <td>{{ eszkoz.gyariszam }}</td>
                 <td>
-                  {% if is_admin %}
-                    <a href="{% url 'beszallito_edit' b.pk %}">Szerkesztés</a>
-                    | <a href="{% url 'beszallito_delete' b.pk %}">Törlés</a>
-                  {% elif is_operator %}
-                  <a href="{% url 'beszallito_edit' b.pk %}">Szerkesztés</a>
-                  {% else %}
-                    <span class="text-muted">Csak megtekintés</span>
-                  {% endif %}
+                    {% if is_admin %}
+                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
+                    | <a href="{% url 'eszkoz_delete' eszkoz.pk %}">Törlés</a>
+                    {% elif is_operator %}
+                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
+                    {% else %}
+                        <span class="text-muted">Csak megtekintés</span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
         </tbody>
       </table>
+      
       <!-- lapozás -->
       <nav aria-label="Oldalak">
         <ul class="pagination justify-content-center">
@@ -78,7 +58,3 @@
           {% endif %}
         </ul>
       </nav>
-</div> 
-
-  
-{% endblock %}

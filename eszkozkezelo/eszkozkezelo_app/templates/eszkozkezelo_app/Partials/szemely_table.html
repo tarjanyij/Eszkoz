@@ -1,0 +1,65 @@
+<table class="table table-hover">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">Megnevezes</th>
+            <th scope="col">email</th>
+            
+            <th scope="col"></th>
+          </tr>
+        </thead>
+        <tbody>
+  
+  {% for b in page_obj %}
+            <tr>
+                <th scope="row">{{ forloop.counter }}</th>
+                <td>{{ b.nev }}</td>
+                <td>{{b.email }}</td>
+                <td>
+                  {% if is_admin %}
+                    <a href="{% url 'szemely_edit' b.pk %}">Szerkesztés</a>
+                    | <a href="{% url 'szemely_delete' b.pk %}">Törlés</a>
+                  {% elif is_operator %}
+                    <a href="{% url 'szemely_edit' b.pk %}">Szerkesztés</a>
+  
+                  {% else %}
+                     <span class="text-muted">Csak megtekintés</span>
+                  {% endif %}  
+                </td>
+            </tr>
+         {% empty %}
+            <tr><td colspan="4">Nincs találat.</td></tr>
+    {% endfor %}
+        </tbody>
+      </table>
+
+<!-- Lapozás -->
+<nav aria-label="Oldalak">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Előző</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Előző</span></li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if page_obj.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+      {% elif num > page_obj.number|add:"-3" and num < page_obj.number|add:"3" %}
+        <li class="page-item">
+          <a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
+        </li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Következő</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled"><span class="page-link">Következő</span></li>
+    {% endif %}
+  </ul>
+</nav>

@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import user_passes_test, login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from django.template import loader
@@ -6,6 +7,10 @@ from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Q
+from django.core.paginator import Paginator
+
+def is_operator_or_admin(user):
+    return user.is_superuser or user.groups.filter(name='Operator').exists()
 
 def register(request):
     if request.method == 'POST':
@@ -24,7 +29,8 @@ def eszkozkezelo_app(request):
 # Create your views here.
 
 ### Eszköz ###
-##############
+##################################################################################################################
+@user_passes_test(is_operator_or_admin, login_url='login')
 def eszkoz_list(request):
     query = request.GET.get('q', '')
     tipus_id = request.GET.get('tipus')
@@ -46,6 +52,21 @@ def eszkoz_list(request):
     
     if aktiv in ['true', 'false']:
         eszkozok = eszkozok.filter(aktiv=(aktiv == 'true'))
+    # Lapozás (10 elem/lap)
+    paginator = Paginator(eszkozok, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+ # AJAX kérés esetén csak a táblázatot adjuk vissza
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'eszkozkezelo_app/partials/eszkoz_table.html', {
+            'page_obj': page_obj,
+            'query': query,
+        })
+    
+    user = request.user
+    is_admin = user.is_superuser
+    is_operator = user.groups.filter(name='Operator').exists()
 
     return render(request, 'eszkozkezelo_app/eszkoz_list.html', {
         'eszkozok': eszkozok,
@@ -55,8 +76,11 @@ def eszkoz_list(request):
         'tipus_id': tipus_id,
         'beszallito_id': beszallito_id,
         'aktiv': aktiv,
+        'page_obj': page_obj,
+        'is_admin': is_admin,
+        'is_operator': is_operator,
     })
-
+@user_passes_test(is_operator_or_admin, login_url='login')
 def eszkoz_brief_view(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)
     return render(request, 'eszkozkezelo_app/eszkoz_brief.html', {'eszkoz': eszkoz})
@@ -70,7 +94,10 @@ def eszkoz_create(request):
     else:
         form = EszkozForm()
     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
+
 # Szerkesztés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def eszkoz_edit(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)
     if request.method == 'POST':
@@ -83,6 +110,8 @@ def eszkoz_edit(request, pk):
     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form, 'eszkoz': eszkoz})
 
 # Törlés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
 def eszkoz_delete(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)
     if request.method == 'POST':
@@ -91,11 +120,36 @@ def eszkoz_delete(request, pk):
     return render(request, 'eszkozkezelo_app/eszkoz_confirm_delete.html', {'eszkoz': eszkoz})
 
 ### Beszállító ###
-##################
+############################################################################################################################
+@user_passes_test(is_operator_or_admin, login_url='login')
 def beszallito_list(request):
+    query = request.GET.get('q', '')
     beszallitok = Beszallito.objects.all()
-    return render(request, 'eszkozkezelo_app/beszallito_list.html', {'beszallitok': beszallitok})
+    
+    if query:
+        beszallitok = beszallitok.filter(
+            Q(beszallitoNev__icontains=query) | Q(beszallitoKontatkt__icontains=query)
+        )
+    
+    # Lapozás (10 elem/lap)
+    paginator = Paginator(beszallitok, 12)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
 
+    user = request.user
+    is_admin = user.is_superuser
+    is_operator = user.groups.filter(name='Operator').exists()
+    
+    return render(request, 'eszkozkezelo_app/beszallito_list.html', {
+        'beszallitok': beszallitok,
+        'query': query,
+        'page_obj': page_obj,
+        'is_admin': is_admin,
+        'is_operator': is_operator,
+    })
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def beszallito_create(request):
     if request.method == 'POST':
         form = BeszallitoForm(request.POST)
@@ -107,6 +161,8 @@ def beszallito_create(request):
     return render(request, 'eszkozkezelo_app/beszallito_form.html', {'form': form})
 
 # Szerkesztés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def beszallito_edit(request, pk):
     beszallito = get_object_or_404(Beszallito, pk=pk)
     if request.method == 'POST':
@@ -119,6 +175,8 @@ def beszallito_edit(request, pk):
     return render(request, 'eszkozkezelo_app/beszallito_form.html', {'form': form})
 
 # Törlés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
 def beszallito_delete(request, pk):
     beszallito = get_object_or_404(Beszallito, pk=pk)
     if request.method == 'POST':
@@ -128,11 +186,45 @@ def beszallito_delete(request, pk):
 
 
 ### Személy ###
-###############
+####################################################################################################################
+@user_passes_test(is_operator_or_admin, login_url='login')
 def szemely_list(request):
-    szemelyek = Szemely.objects.all()
-    return render(request, 'eszkozkezelo_app/szemely_list.html', {'szemelyek': szemelyek})
+    query = request.GET.get('q', '')
 
+    szemelyek = Szemely.objects.all()
+
+    if query:
+        szemelyek = szemelyek.filter(
+            Q(nev__icontains=query) | Q(email__icontains=query)
+        )
+
+    szemelyek = szemelyek.order_by('nev')  # <--- ABC sorrend
+
+    # Lapozás (10 elem/lap)
+    paginator = Paginator(szemelyek, 14)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # AJAX kérés esetén csak a táblázatot adjuk vissza
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return render(request, 'eszkozkezelo_app/partials/szemely_table.html', {
+            'page_obj': page_obj,
+            'query': query,
+        })
+
+    user = request.user
+    is_admin = user.is_superuser
+    is_operator = user.groups.filter(name='Operator').exists()
+
+    return render(request, 'eszkozkezelo_app/szemely_list.html', {
+        'szemelyek': szemelyek,
+        'query': query,
+        'page_obj': page_obj,
+        'is_admin': is_admin,
+        'is_operator': is_operator,
+        })
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def szemely_create(request):
     if request.method == 'POST':
         form = SzemelyForm(request.POST)
@@ -144,6 +236,8 @@ def szemely_create(request):
     return render(request, 'eszkozkezelo_app/szemely_form.html', {'form': form})
 
 # Szerkesztés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def szemely_edit(request, pk):
     szemely = get_object_or_404(Szemely, pk=pk)
     if request.method == 'POST':
@@ -156,6 +250,8 @@ def szemely_edit(request, pk):
     return render(request, 'eszkozkezelo_app/szemely_form.html', {'form': form})
 
 # Törlés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
 def szemely_delete(request, pk):
     szemely = get_object_or_404(Szemely, pk=pk)
     if request.method == 'POST':
@@ -165,11 +261,14 @@ def szemely_delete(request, pk):
 
 
 ### Típus ###
-#############
+################################################################################################################################
+@user_passes_test(is_operator_or_admin, login_url='login')
 def tipus_list(request):
     tipusok = Tipus.objects.all()
     return render(request, 'eszkozkezelo_app/tipus_list.html', {'tipusok': tipusok})
 
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def tipus_create(request):
     if request.method == 'POST':
         form = TipusForm(request.POST)
@@ -181,6 +280,8 @@ def tipus_create(request):
     return render(request, 'eszkozkezelo_app/tipus_form.html', {'form': form})
 
  # Szerkesztés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(is_operator_or_admin)
 def tipus_edit(request, pk):
     tipus = get_object_or_404(Tipus, pk=pk)
     if request.method == 'POST':
@@ -193,6 +294,8 @@ def tipus_edit(request, pk):
     return render(request, 'eszkozkezelo_app/tipus_form.html', {'form': form})
 
 # Törlés
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
 def tipus_delete(request, pk):
     tipus = get_object_or_404(Tipus, pk=pk)
     if request.method == 'POST':

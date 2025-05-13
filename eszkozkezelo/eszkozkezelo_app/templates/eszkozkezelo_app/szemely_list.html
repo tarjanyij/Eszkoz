@@ -1,10 +1,87 @@
 {% extends "eszkozkezelo_app/base.html" %}
 {% block content %}
+
+&nbsp;
   <h2>Személyek</h2>
-  <a href="{% url 'szemely_create' %}">Új személy</a>
-  <ul>
-    {% for b in szemelyek %}
-      <li>{{ b.snev }} - {{ b.email }}</li>
-    {% endfor %}
-  </ul>
+  <a class="btn btn-primary mb-3" role="button" href="{% url 'szemely_create' %}">Új személy</a>
+<form method="get" class="row g-3 mb-4">
+    <div class="col-md-4">
+        <input type="text" name="q" class="form-control" placeholder="Keresés..." value="{{ query }}">
+    </div>
+    <div class="col-auto d-grid">
+        <button type="submit" class="btn btn-primary">Szűrés</button>
+    </div>
+    <div class="col-auto d-grid">
+        <a href="{% url 'szemely_list' %}" class="btn btn-secondary">Összes mutatása</a>
+    </div>
+  </form>
+
+<div class="container mt-5">
+  {% include "eszkozkezelo_app/partials/szemely_table.html" %}
+</div> 
+
+<!-- JQuery (ha nincs még betöltve máshol) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Lapozás AJAX-szal
+    $('#table-container').on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        let url = $(this).attr('href');
+        loadTable(url);
+    });
+
+    // Keresés AJAX-szal
+    $('#filter-form').on('submit', function(e) {
+        e.preventDefault();
+        let url = $(this).attr('action') || window.location.pathname;
+        let query = $(this).serialize();
+        loadTable(`${url}?${query}`);
+    });
+
+    function loadTable(url) {
+        $.ajax({
+            url: url,
+            type: 'get',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            beforeSend: function() {
+                $('#table-container').html('<div class="text-center p-4">Betöltés...</div>');
+            },
+            success: function(data) {
+                $('#table-container').html(data);
+            },
+            error: function(xhr, status, error) {
+                let message = "Hiba történt az adatok betöltésekor.";
+                if (xhr.status === 404) {
+                    message = "Az oldal nem található (404).";
+                } else if (xhr.status === 500) {
+                    message = "Szerverhiba történt (500).";
+                }
+
+                // Toast szöveg frissítése
+                $('#ajaxToastBody').text(message);
+
+                // Toast mutatása
+                let toastEl = document.getElementById('ajaxToast');
+                let toast = new bootstrap.Toast(toastEl);
+                toast.show();
+
+                console.error("AJAX hiba:", status, error);
+            }
+        });
+    }
+});
+</script>
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 1055">
+  <div id="ajaxToast" class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true">
+    <div class="d-flex">
+      <div class="toast-body" id="ajaxToastBody">
+        Hiba történt.
+      </div>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Bezárás"></button>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

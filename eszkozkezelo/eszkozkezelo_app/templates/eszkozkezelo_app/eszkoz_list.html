@@ -47,29 +47,57 @@
 
 <div class="container mt-5">
    
-    <table class="table table-hover">
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th scope="col">Megnevezes</th>
-            <th scope="col">Gyári szám</th>
-            <th scope="col"></th>
-          </tr>
-        </thead>
-        <tbody>
-            {% for eszkoz in eszkozok %}
-            <tr>
-                <th scope="row">{{ forloop.counter }}</th>
-                <td><a href="{% url 'eszkoz_brief' eszkoz.pk %}">{{ eszkoz.megnevezes }}</a></td>
-                <td>{{ eszkoz.gyariszam }}</td>
-                <td>
-                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
-                    | <a href="{% url 'eszkoz_delete' eszkoz.pk %}">Törlés</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-      </table>
+    {% include "eszkozkezelo_app/partials/eszkoz_table.html" %}
 </div> 
-    
+    <!-- JQuery (ha nincs még betöltve máshol) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Lapozás AJAX-szal
+    $('#table-container').on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        let url = $(this).attr('href');
+        loadTable(url);
+    });
+
+    // Keresés AJAX-szal
+    $('#filter-form').on('submit', function(e) {
+        e.preventDefault();
+        let url = $(this).attr('action') || window.location.pathname;
+        let query = $(this).serialize();
+        loadTable(`${url}?${query}`);
+    });
+
+   function loadTable(url) {
+        $.ajax({
+            url: url,
+            type: 'get',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            beforeSend: function() {
+                $('#table-container').html('<div class="text-center p-4">Betöltés...</div>');
+            },
+            success: function(data) {
+                $('#table-container').html(data);
+            },
+            error: function(xhr, status, error) {
+                let message = "Hiba történt az adatok betöltésekor.";
+                if (xhr.status === 404) {
+                    message = "Az oldal nem található (404).";
+                } else if (xhr.status === 500) {
+                    message = "Szerverhiba történt (500).";
+                }
+                $('#table-container').html(`
+                    <div class="alert alert-danger text-center" role="alert">
+                        ${message}
+                    </div>
+                `);
+                console.error("AJAX hiba:", status, error);
+            }
+        });
+    }
+});
+</script>
+
+
 {% endblock %}
