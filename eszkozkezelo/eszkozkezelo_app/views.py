@@ -34,6 +34,7 @@ def eszkozkezelo_app(request):
 def eszkoz_list(request):
     query = request.GET.get('q', '')
     tipus_id = request.GET.get('tipus')
+    szemely_id = request.GET.get('szemely')
     beszallito_id = request.GET.get('beszallito')
     aktiv = request.GET.get('aktiv')
 
@@ -46,6 +47,9 @@ def eszkoz_list(request):
     
     if tipus_id:
         eszkozok = eszkozok.filter(tipus_id=tipus_id)
+    
+    if szemely_id:
+        eszkozok = eszkozok.filter(holvanId_id=szemely_id)
     
     if beszallito_id:
         eszkozok = eszkozok.filter(beszallito_id=beszallito_id)
@@ -68,10 +72,14 @@ def eszkoz_list(request):
     is_admin = user.is_superuser
     is_operator = user.groups.filter(name='Operator').exists()
 
+    szemelyek = Szemely.objects.all()
+    szemelyek = szemelyek.order_by('nev')  # <--- ABC sorrend
+
     return render(request, 'eszkozkezelo_app/eszkoz_list.html', {
         'eszkozok': eszkozok,
         'query': query,
         'tipusok': Tipus.objects.all(),
+        'szemely': szemelyek,
         'beszallitok': Beszallito.objects.all(),
         'tipus_id': tipus_id,
         'beszallito_id': beszallito_id,
