@@ -1,13 +1,14 @@
 from django.contrib.auth.decorators import user_passes_test, login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.template import loader
 from .models import Eszkoz, Beszallito, Szemely, Tipus
-from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm
+from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm, MozgasForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.urls import reverse
 
 def is_operator_or_admin(user):
     return user.is_superuser or user.groups.filter(name='Operator').exists()
@@ -91,7 +92,11 @@ def eszkoz_list(request):
 @user_passes_test(is_operator_or_admin, login_url='login')
 def eszkoz_brief_view(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)
-    return render(request, 'eszkozkezelo_app/eszkoz_brief.html', {'eszkoz': eszkoz})
+    mozgastortenet = eszkoz.mozgastortenet.order_by('-mozgasIdo')  # legfrissebb mozgás elöl
+    return render(request, 'eszkozkezelo_app/eszkoz_brief.html', {
+        'eszkoz': eszkoz,
+        'mozgastortenet': mozgastortenet,
+        })
 
 def eszkoz_create(request):
     if request.method == 'POST':
@@ -311,3 +316,42 @@ def tipus_delete(request, pk):
         return redirect('tipus_list')
     return render(request, 'eszkozkezelo_app/stipus_confirm_delete.html', {'tipus': tipus})
    
+
+#### Mozgás ####
+###############################################################################################################
+def mozgas_letrehozas(request):
+    if request.method == 'POST':
+        form = MozgasForm(request.POST)
+        if form.is_valid():
+            # Először mentsük el a mozgást és tároljuk el a változóban
+            mozgas = form.save()
+            # Eszköz tulajdonosának frissítése a 'hova' mező alapján
+            eszkoz = mozgas.eszkoz
+            eszkoz.holvanId = mozgas.hova
+            eszkoz.save()
+
+            return redirect('eszkoz_list')  # vagy vissza az eszköz részletező oldalára
+    else:
+        form = MozgasForm()
+    
+    return render(request, 'eszkozkezelo_app/mozgas_form.html', {'form': form})
+
+def mozgas_letrehozas_eszkozhoz(request, eszkoz_id):
+    eszkoz = get_object_or_404(Eszkoz, id=eszkoz_id)
+    honnan = eszkoz.holvanId
+
+    if request.method == 'POST':
+        form = MozgasForm(request.POST, eszkoz=eszkoz, honnan=honnan)
+        if form.is_valid():
+            mozgas = form.save()
+            eszkoz.holvanId = form.cleaned_data['hova']
+            eszkoz.save()
+            return redirect('eszkoz_list')
+    else:
+        form = MozgasForm(eszkoz=eszkoz, honnan=honnan)
+
+    return render(request, 'eszkozkezelo_app/mozgas_form.html', {
+        'form': form,
+        'eszkoz': eszkoz,
+        'honnan': honnan,
+    })

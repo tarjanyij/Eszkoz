@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'eszkozkezelo_app',
     'bootstrap5',
+    'widget_tweaks',
 ]
 
 MIDDLEWARE = [

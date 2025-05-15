@@ -7,7 +7,7 @@
 <a class="btn btn-primary mb-3" role="button" href="{% url 'eszkoz_create' %}">Új eszköz</a>
 
 <form method="get" class="row g-3 mb-4">
-    <div class="col-md-3">
+    <div class="col-md-2">
         <input type="text" name="q" class="form-control" placeholder="Keresés..." value="{{ query }}">
     </div>
 
@@ -19,7 +19,7 @@
             {% endfor %}
         </select>
     </div>
-    <div class="col-md-1">
+    <div class="col-auto">
         <select name="szemely" class="form-select">
             <option value="">Összes személy</option>
             {% for t in szemely %}

@@ -28,4 +28,7 @@ urlpatterns = [
     path('tipusok/uj/', views.tipus_create, name='tipus_create'),
     path('tipusok/<int:pk>/szerkesztes/', views.tipus_edit, name='tipus_edit'),
     path('tipusok/<int:pk>/torles/', views.tipus_delete, name='tipus_delete'),
+
+    path('mozgas/uj/', views.mozgas_letrehozas, name='mozgas_letrehozas'),
+    path('mozgas/uj/<int:eszkoz_id>/', views.mozgas_letrehozas_eszkozhoz, name='mozgas_letrehozas_eszkozhez'),
 ]

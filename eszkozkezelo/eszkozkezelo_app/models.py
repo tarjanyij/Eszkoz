@@ -140,3 +140,10 @@ class Mozgas(models.Model):
         Mozgastipusok,
         on_delete=models.CASCADE
     )
+    
+    eszkoz = models.ForeignKey(
+    Eszkoz,
+    on_delete=models.CASCADE,
+    related_name='mozgastortenet',
+    verbose_name="Eszköz"
+    )

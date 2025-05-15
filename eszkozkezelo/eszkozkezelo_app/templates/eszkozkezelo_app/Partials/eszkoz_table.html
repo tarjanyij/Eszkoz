@@ -15,10 +15,12 @@
                 <td>{{ eszkoz.gyariszam }}</td>
                 <td>
                     {% if is_admin %}
-                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
-                    | <a href="{% url 'eszkoz_delete' eszkoz.pk %}">Törlés</a>
+                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}" class="btn btn-sm btn-outline-primary">Szerkesztés</a>
+                     <a href="{% url 'eszkoz_delete' eszkoz.pk %}" class="btn btn-sm btn-outline-danger">Törlés</a>
+                      <a href="{% url 'mozgas_letrehozas_eszkozhez' eszkoz.id %}" class="btn btn-sm btn-outline-info"> Mozgás rögzítése</a>
                     {% elif is_operator %}
-                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}">Szerkesztés</a>
+                    <a href="{% url 'eszkoz_edit' eszkoz.pk %}" class="btn btn-sm btn-outline-primary">Szerkesztés</a>
+                    <a href="{% url 'mozgas_letrehozas_eszkozhez' eszkoz.id %}" class="btn btn-sm btn-outline-sinfo"> Mozgás rögzítése</a>
                     {% else %}
                         <span class="text-muted">Csak megtekintés</span>
                     {% endif %}

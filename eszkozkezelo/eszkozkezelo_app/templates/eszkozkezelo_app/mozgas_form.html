@@ -1,0 +1,50 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card shadow rounded-4">
+        <div class="card-header bg-primary text-white">
+            <h4>Eszköz mozgás rögzítése</h4>
+        </div>
+        <div class="card-body">
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+
+                <!-- Csak megjelenítjük a mezőt -->
+                <div class="mb-3">
+                    <label class="form-label"><strong>Eszköz</strong></label>
+                    <p class="form-control-plaintext">{{ eszkoz.megnevezes }}</p>
+                    {{ form.eszkoz }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label"><strong>Jelenlegi tulajdonos</strong></label>
+                    <p class="form-control-plaintext">{{ honnan.nev }}</p>
+                    {{ form.honnan }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mozgás ideje</label>
+                    {{ form.mozgasIdo }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Hova kerül?</label>
+                    {{ form.hova }}
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Mozgás típusa</label>
+                    {{ form.mozgastipus }}
+                </div>
+
+                <button type="submit" class="btn btn-success">Mentés</button>
+                <a href="{% url 'eszkoz_list' %}" class="btn btn-secondary">Mégse</a>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
