@@ -6,9 +6,73 @@ Eszköz szerkesztése: {{ form.instance.megnevezes }}
 {% else %}
 Új eszköz hozzáadása
 {% endif %}
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Mentés</button>
-    </form>
+    
+<form method="post" id="eszkoz-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <div id="parameterek">
+        {# Ha vannak paraméter mezők a formban (pl. POST után), jelenítsd meg őket #}
+        {% for field in form %}
+            {% if field.name|slice:":6" == "param_" %}
+                <div class="mb-3">
+                    {{ field.label_tag }} {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <button type="submit">Mentés</button>
+</form>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function() {
+    function loadParams(tipusId) {
+        if (!tipusId) {
+            $('#parameterek').empty();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'get_tipus_parameterek' %}",
+            data: { tipus_id: tipusId },
+            dataType: 'json',
+            success: function(data) {
+                let html = '';
+                data.parameterek.forEach(function(param) {
+                    let field = '';
+                    const name = `param_${param.id}`;
+                    if (param.tipus === 'SZ') {
+                        field = `<label>${param.nev}</label><input type="text" name="${name}" class="form-control" /><br>`;
+                    } else if (param.tipus === 'INT') {
+                        field = `<label>${param.nev}</label><input type="number" name="${name}" class="form-control" /><br>`;
+                    } else if (param.tipus === 'FLOAT') {
+                        field = `<label>${param.nev}</label><input type="number" step="any" name="${name}" class="form-control" /><br>`;
+                    } else if (param.tipus === 'BOOL') {
+                        field = `<label>${param.nev}</label><input type="checkbox" name="${name}" /><br>`;
+                    } else if (param.tipus === 'DATE') {
+                        field = `<label>${param.nev}</label><input type="date" name="${name}" class="form-control" /><br>`;
+                    }
+                    html += field;
+                });
+                $('#parameterek').html(html);
+            }
+        });
+    }
+
+    // csak új eszköz esetén dinamikus betöltés
+    $('select[name="tipus"]').change(function() {
+        loadParams($(this).val());
+    });
+    // Ha már ki van választva típus (pl. visszatöltés hibás POST után), töltsük be automatikusan
+    var tipusVal = $('select[name="tipus"]').val();
+    // Csak akkor töltsük be, ha nincsenek paraméter mezők a formban (pl. első betöltés)
+    if (tipusVal && $('#parameterek input').length === 0) {
+        loadParams(tipusVal);
+    }
+});
+</script>
 {% endblock %}

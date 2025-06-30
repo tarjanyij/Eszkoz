@@ -1,0 +1,14 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+{% if form.instance.pk %}
+Kapcsolat szerkesztése: {{ form.instance.tipus }} - {{ form.instance.parameter }}
+{% else %}
+Új kapcsolat hozzáadása
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Mentés</button>
+    <a href="{% url 'tipusparameter_list' %}" class="btn btn-secondary">Mégse</a>
+</form>
+{% endblock %}

@@ -1,9 +1,9 @@
 from django.contrib.auth.decorators import user_passes_test, login_required, user_passes_test
 from django.shortcuts import render, redirect, get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template import loader
-from .models import Eszkoz, Beszallito, Szemely, Tipus
-from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm, MozgasForm
+from .models import Eszkoz, Beszallito, Szemely, Tipus,  TipusParameter, EszkozParameter
+from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm, MozgasForm, EszkozParameterForm, TipusParameterForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Q
@@ -93,20 +93,50 @@ def eszkoz_list(request):
 def eszkoz_brief_view(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)
     mozgastortenet = eszkoz.mozgastortenet.order_by('-mozgasIdo')  # legfrissebb mozgás elöl
+    eszkoz_parameterek = eszkoz.parameterek.select_related('parameter').all()
     return render(request, 'eszkozkezelo_app/eszkoz_brief.html', {
         'eszkoz': eszkoz,
         'mozgastortenet': mozgastortenet,
+        'eszkoz_parameterek': eszkoz_parameterek,
         })
 
+# def eszkoz_create(request):
+#     if request.method == 'POST':
+#         form = EszkozForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('eszkoz_list')
+#     else:
+#         form = EszkozForm()
+#     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
+@user_passes_test(is_operator_or_admin, login_url='login')
 def eszkoz_create(request):
     if request.method == 'POST':
+        # A POST-ban benne lesz minden mező, beleértve a dinamikus paramétereket is
         form = EszkozForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('eszkoz_list')
+        # Ha nem valid, újra megjelenítjük a formot (hibákkal és a paraméter mezőkkel)
     else:
         form = EszkozForm()
     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
+
+def get_tipus_parameterek(request):
+    tipus_id = request.GET.get('tipus_id')
+    adatok = []
+
+    if tipus_id:
+        kapcsolatok = TipusParameter.objects.filter(tipus_id=tipus_id).select_related('parameter')
+        for kapcsolat in kapcsolatok:
+            param = kapcsolat.parameter
+            adatok.append({
+                'id': param.id,
+                'nev': param.nev,
+                'tipus': param.tipus,
+            })
+
+    return JsonResponse({'parameterek': adatok})
 
 # Szerkesztés
 @user_passes_test(is_operator_or_admin, login_url='login')
@@ -355,3 +385,93 @@ def mozgas_letrehozas_eszkozhoz(request, eszkoz_id):
         'eszkoz': eszkoz,
         'honnan': honnan,
     })
+
+### Eszköz Paraméter ###
+####################################################################################################################
+@user_passes_test(is_operator_or_admin, login_url='login')
+def eszkozparameter_list(request):
+    parameterek = EszkozParameter.objects.all()
+    user = request.user
+    is_admin = user.is_superuser
+    is_operator = user.groups.filter(name='Operator').exists()
+    return render(request, 'eszkozkezelo_app/eszkozparameter_list.html', {
+        'parameterek': parameterek,
+        'is_admin': is_admin,
+        'is_operator': is_operator,
+    })
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+def eszkozparameter_create(request):
+    if request.method == 'POST':
+        form = EszkozParameterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('eszkozparameter_list')
+    else:
+        form = EszkozParameterForm()
+    return render(request, 'eszkozkezelo_app/eszkozparameter_form.html', {'form': form})
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+def eszkozparameter_edit(request, pk):
+    param = get_object_or_404(EszkozParameter, pk=pk)
+    if request.method == 'POST':
+        form = EszkozParameterForm(request.POST, instance=param)
+        if form.is_valid():
+            form.save()
+            return redirect('eszkozparameter_list')
+    else:
+        form = EszkozParameterForm(instance=param)
+    return render(request, 'eszkozkezelo_app/eszkozparameter_form.html', {'form': form})
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
+def eszkozparameter_delete(request, pk):
+    param = get_object_or_404(EszkozParameter, pk=pk)
+    if request.method == 'POST':
+        param.delete()
+        return redirect('eszkozparameter_list')
+    return render(request, 'eszkozkezelo_app/eszkozparameter_confirm_delete.html', {'param': param})
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+def tipusparameter_list(request):
+    kapcsolatok = TipusParameter.objects.select_related('tipus', 'parameter').all()
+    user = request.user
+    is_admin = user.is_superuser
+    is_operator = user.groups.filter(name='Operator').exists()
+    return render(request, 'eszkozkezelo_app/tipusparameter_list.html', {
+        'kapcsolatok': kapcsolatok,
+        'is_admin': is_admin,
+        'is_operator': is_operator,
+    })
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+def tipusparameter_create(request):
+    if request.method == 'POST':
+        form = TipusParameterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('tipusparameter_list')
+    else:
+        form = TipusParameterForm()
+    return render(request, 'eszkozkezelo_app/tipusparameter_form.html', {'form': form})
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+def tipusparameter_edit(request, pk):
+    kapcsolat = get_object_or_404(TipusParameter, pk=pk)
+    if request.method == 'POST':
+        form = TipusParameterForm(request.POST, instance=kapcsolat)
+        if form.is_valid():
+            form.save()
+            return redirect('tipusparameter_list')
+    else:
+        form = TipusParameterForm(instance=kapcsolat)
+    return render(request, 'eszkozkezelo_app/tipusparameter_form.html', {'form': form})
+
+@user_passes_test(is_operator_or_admin, login_url='login')
+@user_passes_test(lambda u: u.is_superuser)
+def tipusparameter_delete(request, pk):
+    kapcsolat = get_object_or_404(TipusParameter, pk=pk)
+    if request.method == 'POST':
+        kapcsolat.delete()
+        return redirect('tipusparameter_list')
+    return render(request, 'eszkozkezelo_app/tipusparameter_confirm_delete.html', {'kapcsolat': kapcsolat})

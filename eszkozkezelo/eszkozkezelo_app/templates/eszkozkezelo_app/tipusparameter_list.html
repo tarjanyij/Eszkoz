@@ -1,0 +1,36 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+<h2>Típus-Paraméter kapcsolatok</h2>
+<a class="btn btn-primary mb-3" href="{% url 'tipusparameter_create' %}">Új kapcsolat</a>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Típus</th>
+            <th>Paraméter</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for k in kapcsolatok %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ k.tipus.megnevezes }}</td>
+            <td>{{ k.parameter.nev }}</td>
+            <td>
+                {% if is_admin %}
+                    <a href="{% url 'tipusparameter_edit' k.pk %}">Szerkesztés</a> |
+                    <a href="{% url 'tipusparameter_delete' k.pk %}">Törlés</a>
+                {% elif is_operator %}
+                    <a href="{% url 'tipusparameter_edit' k.pk %}">Szerkesztés</a>
+                {% else %}
+                    <span class="text-muted">Csak megtekintés</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nincs kapcsolat.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

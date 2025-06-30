@@ -1,0 +1,10 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+<h3>Biztosan törli ezt a kapcsolatot?</h3>
+<p><strong>{{ kapcsolat.tipus.megnevezes }} - {{ kapcsolat.parameter.nev }}</strong></p>
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Törlés</button>
+    <a href="{% url 'tipusparameter_list' %}" class="btn btn-secondary">Mégse</a>
+</form>
+{% endblock %}

@@ -9,10 +9,10 @@
         <dl class="row">
           <dt class="col-sm-4">Gyári szám:</dt>
           <dd class="col-sm-8">{{ eszkoz.gyariszam }}</dd>
-  
+          
           <dt class="col-sm-4">Típus:</dt>
           <dd class="col-sm-8">{{ eszkoz.tipus.megnevezes }}</dd>
-  
+          
           <dt class="col-sm-4">Beszerzési idő:</dt>
           <dd class="col-sm-8">{{ eszkoz.beszerzesiIdo }}</dd>
   
@@ -46,7 +46,30 @@
           <dt class="col-sm-4">Beszállító:</dt>
           <dd class="col-sm-8">{{ eszkoz.beszallito.beszallitoNev }}</dd>
         </dl>
+
+        {% if eszkoz_parameterek %}
+        
+        <dl class="row">
+          
+          
+          {% for p in eszkoz_parameterek %}
+            
+            {% if p.ertek_formazott != "None" and p.ertek_formazott != "" %}
+              <dt class="col-sm-4">{{ p.parameter.nev }} :</dt>
+              <dd class="col-sm-8">{{ p.ertek_formazott }}
+                {% if p.parameter.mertekegyseg %}
+                  {{ p.parameter.mertekegyseg }}
+                {% endif %}
+              </dd>
+            {% endif %}
+            
+          {% endfor %}
+        
+        </dl>
+        {% endif %}
+
         <a href="{% url 'eszkoz_edit' eszkoz.id %}" class="btn btn-outline-primary">Szerkesztés</a>
+        <a href="{% url 'mozgas_letrehozas_eszkozhez' eszkoz.id %}" class="btn btn-outline-info"> Mozgás rögzítése</a>
         <a href="{% url 'eszkoz_list' %}" class="btn btn-secondary">Vissza a listához</a>
     </div>
 </div>

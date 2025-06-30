@@ -1,0 +1,40 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+<h2>Eszköz Paraméterek</h2>
+<a class="btn btn-primary mb-3" href="{% url 'eszkozparameter_create' %}">Új paraméter</a>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>#</th>
+            <th>Név</th>
+            <th>Típus</th>
+            <th>Mértékegység</th>
+            <th>Leírás</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for p in parameterek %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ p.nev }}</td>
+            <td>{{ p.get_tipus_display }}</td>
+            <td>{{ p.mertekegyseg|default:"Nincs mértékegység" }}</td>
+            <td>{{ p.leiras|default:"Nincs leírás" }}</td>
+            <td>
+                {% if is_admin %}
+                    <a href="{% url 'eszkozparameter_edit' p.pk %}">Szerkesztés</a> |
+                    <a href="{% url 'eszkozparameter_delete' p.pk %}">Törlés</a>
+                {% elif is_operator %}
+                    <a href="{% url 'eszkozparameter_edit' p.pk %}">Szerkesztés</a>
+                {% else %}
+                    <span class="text-muted">Csak megtekintés</span>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Nincs paraméter.</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

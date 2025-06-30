@@ -1,0 +1,14 @@
+{% extends "eszkozkezelo_app/base.html" %}
+{% block content %}
+{% if form.instance.pk %}
+Paraméter szerkesztése: {{ form.instance.nev }}
+{% else %}
+Új paraméter hozzáadása
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Mentés</button>
+    <a href="{% url 'eszkozparameter_list' %}" class="btn btn-secondary">Mégse</a>
+</form>
+{% endblock %}

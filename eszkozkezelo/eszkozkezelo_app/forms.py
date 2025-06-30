@@ -1,10 +1,71 @@
 from django import forms
-from .models import Eszkoz, Beszallito, Szemely, Tipus, Mozgas
+from .models import Eszkoz, Beszallito, Szemely, Tipus, Mozgas, EszkozParameter, EszkozParameterErtek, TipusParameter, Parametertipus, Kepek
+
+#class EszkozForm(forms.ModelForm):
+#   class Meta:
+#        model = Eszkoz
+#        fields = '__all__'
 
 class EszkozForm(forms.ModelForm):
     class Meta:
         model = Eszkoz
-        fields = '__all__'
+        fields = ['megnevezes', 'gyariszam', 'tartozek', 'tartozek_eszkoz', 'beszerzesiIdo',
+                  'selejtezesiIdo', 'aktiv', 'garanciaIdo', 'beszallito', 'tipus', 'holvanId']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        if 'tipus' in self.data:
+            try:
+                tipus_id = int(self.data.get('tipus'))
+                self.add_param_fields(tipus_id)
+            except (ValueError, TypeError):
+                pass
+        elif self.instance.pk:
+            self.add_param_fields(self.instance.tipus_id)
+        
+        
+
+    def add_param_fields(self, tipus_id):
+        kapcsolatok = TipusParameter.objects.filter(tipus_id=tipus_id).select_related('parameter')
+        for kapcsolat in kapcsolatok:
+            param = kapcsolat.parameter
+            field_name = f'param_{param.id}'
+
+            if param.tipus == Parametertipus.SZOVEG:
+                self.fields[field_name] = forms.CharField(label=param.nev, required=False)
+            elif param.tipus == Parametertipus.EGESZ:
+                self.fields[field_name] = forms.IntegerField(label=param.nev, required=False)
+            elif param.tipus == Parametertipus.SZAM:
+                self.fields[field_name] = forms.FloatField(label=param.nev, required=False)
+            elif param.tipus == Parametertipus.LOGIKAI:
+                self.fields[field_name] = forms.BooleanField(label=param.nev, required=False)
+            elif param.tipus == Parametertipus.DATUM:
+                self.fields[field_name] = forms.DateField(label=param.nev, required=False, widget=forms.DateInput(attrs={'type': 'date'}))
+
+            self.fields[field_name].param_obj = param  # hozzárendeljük a paraméter objektumot
+    
+    def save(self, commit=True):
+        instance = super().save(commit=commit)
+
+        for name, field in self.fields.items():
+            if name.startswith("param_") and hasattr(field, "param_obj"):
+                value = self.cleaned_data.get(name)
+
+                param = field.param_obj
+                ertek = EszkozParameterErtek(eszkoz=instance, parameter=param)
+
+                if param.tipus == Parametertipus.SZOVEG:
+                    ertek.ertek_szoveg = value
+                elif param.tipus in [Parametertipus.EGESZ, Parametertipus.SZAM]:
+                    ertek.ertek_szam = value
+                elif param.tipus == Parametertipus.LOGIKAI:
+                    ertek.ertek_logikai = value
+                elif param.tipus == Parametertipus.DATUM:
+                    ertek.ertek_datum = value
+
+                ertek.save()
+        return instance
 
 class BeszallitoForm(forms.ModelForm):
     class Meta:
@@ -56,3 +117,13 @@ class MozgasForm(forms.ModelForm):
             raise forms.ValidationError("Nem lehet az eszközt ugyanattól ugyanannak mozgatni.")
 
         return cleaned_data
+
+class EszkozParameterForm(forms.ModelForm):
+    class Meta:
+        model = EszkozParameter
+        fields = ['nev', 'tipus', 'mertekegyseg', 'leiras']
+
+class TipusParameterForm(forms.ModelForm):
+    class Meta:
+        model = TipusParameter
+        fields = ['tipus', 'parameter']
