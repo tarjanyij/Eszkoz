@@ -77,6 +77,12 @@ class Beszallito(models.Model):
         return self.beszallitoNev
 
 class Eszkoz(models.Model):
+    leltari_szam = models.CharField(
+        max_length=10,
+        unique=True,
+        verbose_name="Leltári szám",
+        help_text="Automatikusan generált leltári szám"
+    )
     megnevezes = models.CharField(max_length=255, verbose_name="Eszköz elnevezése",help_text="Az esköz pontos típuselnevezése")
     gyariszam = models.CharField(max_length=60,verbose_name="Gyári szám",help_text="Az esköz gyártási száma")
     tartozek = models.BooleanField(verbose_name="Tartozék",help_text="Ez az eszköz valamely másik eszköz tartozéka - beépítésre került")
@@ -103,6 +109,20 @@ class Eszkoz(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Hol van"
     )
+
+    def save(self, *args, **kwargs):
+        if not self.leltari_szam:
+            last = Eszkoz.objects.order_by('-id').first()
+            next_num = 0
+            if last and last.leltari_szam and last.leltari_szam.startswith('TDF'):
+                try:
+                    last_num = int(last.leltari_szam[3:])
+                    next_num = last_num + 1
+                except ValueError:
+                    next_num = 0
+            self.leltari_szam = f"TDF{next_num:05d}"
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.megnevezes  
 

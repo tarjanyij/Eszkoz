@@ -168,7 +168,7 @@ def eszkoz_image_upload(request, eszkoz_id):
         for idx, img in enumerate(request.FILES.getlist('images'), start=1):
             ext = os.path.splitext(img.name)[1] or '.jpg'
             sorszam = existing_count + idx
-            filename = f"{eszkoz.pk}_{sorszam}{ext}"
+            filename = f"{eszkoz.leltari_szam}_{sorszam}{ext}"
             kep_instance = Kepek(
                 eszkoz_id=eszkoz,  # <-- Itt Eszkoz példányt kell átadni!
                 keszitesIdeje=today

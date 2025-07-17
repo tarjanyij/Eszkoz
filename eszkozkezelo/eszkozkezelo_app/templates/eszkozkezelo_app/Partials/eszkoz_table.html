@@ -3,6 +3,7 @@
           <tr>
             <th scope="col">#</th>
             <th scope="col">Megnevezes</th>
+            <th scope="col">Leltári szám</th>
             <th scope="col">Gyári szám</th>
             <th scope="col"></th>
           </tr>
@@ -12,6 +13,7 @@
             <tr>
                 <th scope="row">{{ forloop.counter }}</th>
                 <td><a href="{% url 'eszkoz_brief' eszkoz.pk %}">{{ eszkoz.megnevezes }}</a></td>
+                <td>{{ eszkoz.leltari_szam }}</td>
                 <td>{{ eszkoz.gyariszam }}</td>
                 <td>
                     {% if is_admin %}
