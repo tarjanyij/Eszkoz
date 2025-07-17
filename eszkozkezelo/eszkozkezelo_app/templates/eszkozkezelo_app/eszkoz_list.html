@@ -56,7 +56,31 @@
    
     {% include "eszkozkezelo_app/partials/eszkoz_table.html" %}
 </div> 
-    <!-- JQuery (ha nincs még betöltve máshol) -->
+
+<div class="modal fade" id="imageUploadModal" tabindex="-1" aria-labelledby="imageUploadModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="image-upload-form" enctype="multipart/form-data" method="post">
+      {% csrf_token %}
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="imageUploadModalLabel">Képek feltöltése</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Bezárás"></button>
+        </div>
+        <div class="modal-body">
+          <input type="file" name="images" id="image-files" multiple accept="image/*" class="form-control mb-3">
+          <input type="hidden" name="eszkoz_id" id="modal-eszkoz-id">
+          <div id="upload-feedback"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Feltöltés</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Mégse</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- JQuery (ha nincs még betöltve máshol) -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
@@ -103,6 +127,37 @@ $(document).ready(function() {
             }
         });
     }
+
+    $('#imageUploadModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var eszkozId = button.data('eszkoz-id');
+        $('#modal-eszkoz-id').val(eszkozId);
+        $('#upload-feedback').html('');
+        $('#image-files').val('');
+    });
+
+    $('#image-upload-form').on('submit', function(e) {
+        e.preventDefault();
+        var eszkozId = $('#modal-eszkoz-id').val();
+        var formData = new FormData(this);
+        $.ajax({
+            url: `/eszkoz/${eszkozId}/image-upload/`,
+            type: "POST",
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            success: function(response) {
+                $('#upload-feedback').html('<div class="alert alert-success">Sikeres feltöltés!</div>');
+                setTimeout(function() {
+                    $('#imageUploadModal').modal('hide');
+                }, 1200);
+            },
+            error: function(xhr) {
+                $('#upload-feedback').html('<div class="alert alert-danger">Hiba történt a feltöltés során.</div>');
+            }
+        });
+    });
 });
 </script>
 

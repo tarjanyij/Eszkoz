@@ -18,6 +18,10 @@
                     <a href="{% url 'eszkoz_edit' eszkoz.pk %}" class="btn btn-sm btn-outline-primary">Szerkesztés</a>
                      <a href="{% url 'eszkoz_delete' eszkoz.pk %}" class="btn btn-sm btn-outline-danger">Törlés</a>
                       <a href="{% url 'mozgas_letrehozas_eszkozhez' eszkoz.id %}" class="btn btn-sm btn-outline-info"> Mozgás rögzítése</a>
+                      <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#imageUploadModal" data-eszkoz-id="{{ eszkoz.id }}">
+                          Kép feltöltése
+                      </button>
+                      
                     {% elif is_operator %}
                     <a href="{% url 'eszkoz_edit' eszkoz.pk %}" class="btn btn-sm btn-outline-primary">Szerkesztés</a>
                     <a href="{% url 'mozgas_letrehozas_eszkozhez' eszkoz.id %}" class="btn btn-sm btn-outline-sinfo"> Mozgás rögzítése</a>

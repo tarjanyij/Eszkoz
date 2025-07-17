@@ -2,13 +2,16 @@ from django.contrib.auth.decorators import user_passes_test, login_required, use
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.template import loader
-from .models import Eszkoz, Beszallito, Szemely, Tipus,  TipusParameter, EszkozParameter
+from .models import Eszkoz, Beszallito, Szemely, Tipus,  TipusParameter, EszkozParameter ,Kepek
 from .forms import EszkozForm, BeszallitoForm, SzemelyForm, TipusForm, MozgasForm, EszkozParameterForm, TipusParameterForm
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator
 from django.urls import reverse
+import datetime
+import os
+from django.core.files.base import ContentFile
 
 def is_operator_or_admin(user):
     return user.is_superuser or user.groups.filter(name='Operator').exists()
@@ -100,15 +103,7 @@ def eszkoz_brief_view(request, pk):
         'eszkoz_parameterek': eszkoz_parameterek,
         })
 
-# def eszkoz_create(request):
-#     if request.method == 'POST':
-#         form = EszkozForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('eszkoz_list')
-#     else:
-#         form = EszkozForm()
-#     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
+# Létrehozás
 @user_passes_test(is_operator_or_admin, login_url='login')
 def eszkoz_create(request):
     if request.method == 'POST':
@@ -161,6 +156,26 @@ def eszkoz_delete(request, pk):
         Eszkoz.delete()
         return redirect('eszkoz_list')
     return render(request, 'eszkozkezelo_app/eszkoz_confirm_delete.html', {'eszkoz': eszkoz})
+
+# Képfeltöltés
+# A feltöltéshez AJAX kérés szükséges, ezért a nézet JSON választ ad
+@user_passes_test(is_operator_or_admin, login_url='login')
+def eszkoz_image_upload(request, eszkoz_id):
+    if request.method == 'POST' and request.FILES.getlist('images'):
+        eszkoz = get_object_or_404(Eszkoz, pk=eszkoz_id)
+        today = datetime.date.today()
+        existing_count = Kepek.objects.filter(eszkoz_id=eszkoz.pk).count()
+        for idx, img in enumerate(request.FILES.getlist('images'), start=1):
+            ext = os.path.splitext(img.name)[1] or '.jpg'
+            sorszam = existing_count + idx
+            filename = f"{eszkoz.pk}_{sorszam}{ext}"
+            kep_instance = Kepek(
+                eszkoz_id=eszkoz,  # <-- Itt Eszkoz példányt kell átadni!
+                keszitesIdeje=today
+            )
+            kep_instance.kep.save(filename, img, save=True)
+        return JsonResponse({'success': True})
+    return JsonResponse({'success': False}, status=400)
 
 ### Beszállító ###
 ############################################################################################################################

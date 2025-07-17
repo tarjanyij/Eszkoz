@@ -110,16 +110,25 @@
       </div>
       <div class="card-body">  
     
-        <ul>
+        {% comment %} <ul>
             {% for kep in eszkoz.kepek.all %}
                 <li><img src="{{ kep.kep.url }}" alt="Kép" width="200"></li>
             {% empty %}
                 <li>Nincs feltöltött kép.</li>
             {% endfor %}
-        </ul>
-        
-
+        </ul> {% endcomment %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+        {% for kep in eszkoz.kepek.all %}
+        <div class="col">
+          <div class="card h-100">
+            <img src="{{ kep.kep.url }}" alt="Kép" class="card-img-top">
+          </div>
         </div>
+        {% empty %}
+          <div class="card">Nincs feltöltött kép.</div>
+        {% endfor %}
+        </div>
+      </div>
     </div>
 </div> 
 
