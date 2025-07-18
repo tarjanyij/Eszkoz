@@ -107,12 +107,12 @@ def eszkoz_brief_view(request, pk):
 @user_passes_test(is_operator_or_admin, login_url='login')
 def eszkoz_create(request):
     if request.method == 'POST':
-        # A POST-ban benne lesz minden mező, beleértve a dinamikus paramétereket is
         form = EszkozForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
             return redirect('eszkoz_list')
-        # Ha nem valid, újra megjelenítjük a formot (hibákkal és a paraméter mezőkkel)
+        else:
+            print("FORM ERRORS:", form.errors)  # Hibák naplózása fejlesztéshez
     else:
         form = EszkozForm()
     return render(request, 'eszkozkezelo_app/eszkoz_form.html', {'form': form})
@@ -153,7 +153,7 @@ def eszkoz_edit(request, pk):
 def eszkoz_delete(request, pk):
     eszkoz = get_object_or_404(Eszkoz, pk=pk)
     if request.method == 'POST':
-        Eszkoz.delete()
+        eszkoz.delete()  # <-- példány törlése!
         return redirect('eszkoz_list')
     return render(request, 'eszkozkezelo_app/eszkoz_confirm_delete.html', {'eszkoz': eszkoz})
 

@@ -3,6 +3,7 @@ import datetime
 import os
 from django.conf import settings
 import environ
+from django import forms
 
 # Create your models here.
 class Tipus(models.Model):
@@ -84,14 +85,20 @@ class Eszkoz(models.Model):
         max_length=10,
         unique=True,
         verbose_name="Leltári szám",
-        help_text="Automatikusan generált leltári szám"
+        help_text="Automatikusan generált leltári szám",
+        blank=True  # <-- EZ FONTOS!
     )
     megnevezes = models.CharField(max_length=255, verbose_name="Eszköz elnevezése",help_text="Az esköz pontos típuselnevezése")
     gyariszam = models.CharField(max_length=60,verbose_name="Gyári szám",help_text="Az esköz gyártási száma")
     tartozek = models.BooleanField(verbose_name="Tartozék",help_text="Ez az eszköz valamely másik eszköz tartozéka - beépítésre került")
     tartozek_eszkoz = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Mely eszköz tartozéka",help_text="Melyik eszköznek a tartozéka")
     beszerzesiIdo = models.DateField(default=datetime.date.today, verbose_name="Beszerzés ideje",help_text="Beszerzés időpontja ( asz eszköz felvétel időpontja)")
-    selejtezesiIdo = models.DateField(auto_now=False, auto_now_add=False, verbose_name="Selejtezési idő",help_text="Mikor került selejtezésre az esköz")
+    selejtezesiIdo = models.DateField(
+        null=True,           # <-- Nem kötelező!
+        blank=True,          # <-- Nem kötelező!
+        verbose_name="Selejtezési idő",
+        help_text="Mikor került selejtezésre az esköz"
+    )
     aktiv = models.BooleanField(default=True, verbose_name="Aktív",help_text="Kiadható még az eszköz")
     garanciaIdo = models.IntegerField(verbose_name="Garancia idő",help_text="Garancia időtartama hónapokban")
 
@@ -221,3 +228,8 @@ class TipusParameter(models.Model):
 
     def __str__(self):
         return f"{self.tipus} - {self.parameter}"
+
+class EszkozForm(forms.ModelForm):
+    class Meta:
+        model = Eszkoz
+        exclude = ['leltari_szam']  # vagy: fields = [...], de NE legyen benne a leltari_szam
