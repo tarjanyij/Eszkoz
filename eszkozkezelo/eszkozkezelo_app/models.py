@@ -1,5 +1,8 @@
 from django.db import models
 import datetime
+import os
+from django.conf import settings
+import environ
 
 # Create your models here.
 class Tipus(models.Model):
@@ -112,15 +115,19 @@ class Eszkoz(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.leltari_szam:
+            # Betöltjük az előtagot az .env-ből
+            env = environ.Env()
+            env.read_env(os.path.join(settings.BASE_DIR, '.env'))
+            prefix = env('LELTARI_PREFIX', default='TDF')
             last = Eszkoz.objects.order_by('-id').first()
             next_num = 0
-            if last and last.leltari_szam and last.leltari_szam.startswith('TDF'):
+            if last and last.leltari_szam and last.leltari_szam.startswith(prefix):
                 try:
-                    last_num = int(last.leltari_szam[3:])
+                    last_num = int(last.leltari_szam[len(prefix):])
                     next_num = last_num + 1
                 except ValueError:
                     next_num = 0
-            self.leltari_szam = f"TDF{next_num:05d}"
+            self.leltari_szam = f"{prefix}{next_num:05d}"
         super().save(*args, **kwargs)
 
     def __str__(self):
